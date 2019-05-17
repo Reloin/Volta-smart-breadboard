@@ -1,5 +1,5 @@
-const int resistor = 2000; //the fixed resistor used
-const int offset = 1000; //Eliminate inaccuracy
+const int resistor = 2000;  //the fixed resistor used
+const int offset = 0; //Eliminate inaccuracy
 
 const int a = 2; //3 pin to rule them all
 const int b = 3;
@@ -17,7 +17,7 @@ Serial.begin(9600);
 
 void loop() {
   // loop through all the cd4015 I/O
-  for (int i = 0; i < 4; ++i){
+  for (int i = 0; i < 8; ++i){
     digitalWrite(a, HIGH && (i & B00000001)); //still loop
     digitalWrite(b, HIGH && (i & B00000010));
     digitalWrite(c, HIGH && (i & B00000100));
@@ -26,7 +26,7 @@ void loop() {
     Serial.print(i);
     Serial.print(" = ");
     Serial.println(reading(A0)); // refer to the function
-    delay(1000);
+    delay(500);
     }
 
 
