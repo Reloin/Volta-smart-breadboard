@@ -9,21 +9,18 @@ reading = [] #Array of resistance values converted to integers
 data = [] #Array after obtaining mean of 2 resistance values
 count = 0
 
-try:
-    arduino = serial.Serial(port, 9600, timeout=0)
-except:
-    print('Please check port ' + port)
+arduino = serial.Serial(port, 9600, timeout=0)
 
-while serial.readline():
-    rawdata.append(str(serial.readline()))
+while arduino.readline():
+    rawdata.append(str(arduino.readline()))
     serialString = " ".join(rawdata)
-    serialString = serialString.split('= ')[2]
-    reading.append(int(serialString))
+    dataString = serialString.split(' ')[2]
+    reading.append(int(dataString))
     if count & 1:
         mean = (reading[count] + reading[count + 1]) / 2
         data.append(mean)
         identify(mean, count)
-    print(data)
+    print(serialString.split(' ')[0] + data)
     rawdata[:] = [] #Empties array
     serialString = ''
     time.sleep(500)

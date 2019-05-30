@@ -3,6 +3,8 @@
 # Edit at https://www.gitignore.io/?templates=macos
 
 venv/*
+__pycache__/*
+.vscode/*
 
 ### macOS ###
 # General
