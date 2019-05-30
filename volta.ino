@@ -57,7 +57,7 @@ void show (int group, int pin) {
       case 5: Serial.write("5");
               break;        
     }
-    if(group % 2) pin += 4;// to shift right hand side group to corresponding location
+    if(group & 1) pin += 4;// to shift right hand side group to corresponding location
  }
  //for right hand side
  else {
@@ -75,7 +75,7 @@ void show (int group, int pin) {
       case 5: Serial.write("6");
               break;        
     }
-    if(!(group % 2)) pin -= 4;//shift left hand side to corresponding location
+    if(!(group & 1)) pin -= 4;//shift left hand side to corresponding location
  }
     
    Serial.write(row[pin]);

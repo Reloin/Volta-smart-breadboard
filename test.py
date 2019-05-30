@@ -1,11 +1,16 @@
-import sys
-from PyQt5 import QtGui, QtSvg, QtWidgets
+import numpy as np
+import re
 
-app = QtWidgets.QApplication(sys.argv) 
+row = 'abcdefgh'
 
-svgWidget = QtSvg.QSvgWidget('halfBreadboard.svg')
+a = np.array([ ['1a', 100], ['2a', 200], ['3a', 300] ])
 
-svgWidget.show()
+r = re.compile("([a-zA-Z]+)([0-9]+)")
 
+for i in range(len(a)):
+    for x in range(2):
+        print(a[i, x])
+        pin = re.split('(\d+)', a[i, 0])[2]
+        print(pin)
 
-sys.exit(app.exec_())
+print(str(np.where(a == '4a')[0]))
