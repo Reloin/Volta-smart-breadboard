@@ -71,7 +71,8 @@ class mywindow(QtWidgets.QMainWindow):
                         row[i] = str(row[i])
                     else:
                         row[i] = int(row[i])
-                reading.append(row)
+                reading.append(reading, row)
+                reading = np.delete(reading, 0, axis = 0)
 
             
 
@@ -111,8 +112,9 @@ class mywindow(QtWidgets.QMainWindow):
         self.addComponents(partial(self, path, result, pin))
         
     def addComponents(self, path, dictsize, pin):
-        global i
+        global xposition
         global scene
+        global yposition
         size = self.getSvgSize(path)
         svg_renderer = QtSvg.QSvgRenderer(path)
 
@@ -129,18 +131,17 @@ class mywindow(QtWidgets.QMainWindow):
         
         scene.addItem(pixmapitem)
 
-        rowHeight = 0
         if pin & 1 and pin > 1:
-            rowHeight += 37
+            yposition += 37
 
-        pixmapitem.moveBy(67+19 * i + i * 1.1, 92 + rowHeight) 
+        pixmapitem.moveBy(67+19 * xposition + xposition * 1.1, 92 + yposition) 
         
         view = self.ui.graphicsView
         
         view.setScene(scene)
         
         view.show()
-        i += 1
+        xposition += 1
 
     def getSvgSize(path, attributes): #get dimensions of svg to keep proper aspect ratio
         paths, attributes = svg2paths(attributes)
@@ -156,7 +157,8 @@ class mywindow(QtWidgets.QMainWindow):
     
 app = QtWidgets.QApplication([])
 
-i = 0
+xposition = 0 
+yposition = 0
 scene = QGraphicsScene() 
 application = mywindow()
   
