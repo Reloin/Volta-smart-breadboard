@@ -1,45 +1,51 @@
 from range_key_dict import RangeKeyDict
 import serial
 import time
+import numpy as np
+import warnings
 
-port = 'COM3'
+warnings.simplefilter(action='ignore', category=FutureWarning)
+port = '/dev/cu.usbmodem14101'
 rawdata = []
 serialstring = ''
 reading = [] #Array of resistance values converted to integers
 data = [] #Array after obtaining mean of 2 resistance values
 count = 0
+i = 0
 
-arduino = serial.Serial(port, 9600, timeout=0)
+arduino = serial.Serial(port, 9600)
+treading = np.array([[1,1]])
 
-def main():
-    global count
-    while arduino.readline():
-        rawdata.append(str(arduino.readline()))
-        serialString = " ".join(rawdata)
-        dataString = serialString.split(' ')[2]
-        reading.append(int(dataString))
-        if count & 1:
-            mean = (reading[count] + reading[count + 1]) / 2
-            data.append(mean)
-            identify(mean, count)
-        print(serialString.split(' ')[0] + data)
+while arduino.readable():
+    serialString = arduino.readline().decode()
+    reading = np.array([['1', 1]]) #Array of resistance values converted to integers
+
+    row = serialString.split(' ')
+    if serialString.split(' ')[1]:
+        for i in range(len(row)):
+            if i == 0:
+                row[i] = str(row[i])
+            elif i == 1:
+                row[i] = int(row[i])
+               
+        reading = np.vstack((reading, row))
+             
+        reading = np.delete(reading, 0, axis = 0) #delete first array, fak numpy
+                
+        treading = np.vstack((treading, reading))
+        if count == 0:
+            treading = np.delete(treading, 0, axis = 0)
+            
         rawdata[:] = [] #Empties array
         serialString = ''
-        time.sleep(500)
+
         count += 1
-    else:
-        data[:] = []
-        reading[:] = []
-        serialString = ''
-        count = 0
 
-def identify(resistance, count):
-    count -= 1
-    switcher = RangeKeyDict({
-        (0, 100): [1, 2], #Add range of resistance values for different components
-        (100, 200): 'Button'
-    })
-    print(switcher.get(resistance))
-
-
+        if ('1h' in treading):
+            print("Reading: " + str(i))
+            print(treading)    
+            treading = np.array([[1,1]])
+            count = 0
+    i += 1
+        
 

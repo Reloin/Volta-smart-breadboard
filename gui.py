@@ -5,6 +5,10 @@ from svgpathtools import svg2paths
 from functools import partial
 import re
 import numpy as np
+from threading import Thread
+from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtWidgets import (QApplication, QDialog,
+                             QProgressBar, QPushButton)
  
 from ui import Ui_MainWindow  # importing our generated file
  
@@ -14,7 +18,7 @@ import serial
 import time
 from switcher import switcher
 
-port = 'COM3'
+port = '/dev/cu.usbmodem14101'
 rawdata = []
 serialstring = ''
 data = [] #Array after obtaining mean of 2 resistance values
@@ -38,6 +42,10 @@ class mywindow(QtWidgets.QMainWindow):
         
         self.ui.setupUi(self)
 
+        self.progress = QProgressBar(self)
+        self.progress.setGeometry(50, 540, 700, 35)
+        self.progress.setMaximum(100)
+
         size = self.getSvgSize('halfBreadboard.svg')
         svg_renderer = QtSvg.QSvgRenderer('halfBreadboard.svg')
         pixmap = QtGui.QImage(size[0], size[1] * 1.2, QtGui.QImage.Format_ARGB32)
@@ -58,44 +66,68 @@ class mywindow(QtWidgets.QMainWindow):
         self.main()
 
     def main(self): #read serial to get resistance and pin
+        global count
+        global count2
         global treading
-        while arduino.readline():
-            rawdata.append(str(arduino.readline()))
-            serialString = " ".join(rawdata)
-            
-            dataString = serialString.split(' ')[1]
+
+        treading = np.array([1,2])
+        count = 0
+
+        Worker().run()
+        time.sleep(5)
+        
+        while arduino.readable():
+            serialString = arduino.readline().decode()
 
             reading = np.array([['1', 1]]) #Array of resistance values converted to integers
 
-            row = serialString().split(' ')
-            if serialString().split(' ')[1]:
-                for i in range(len(row)):
-                    if i & 1:
-                        row[i] = str(row[i])
-                    else:
-                        row[i] = int(row[i])
-                reading.vstack((reading, row))
-                reading = np.delete(reading, 0, axis = 0) #delete first array, fak numpy
-                treading.vstack((treading, reading))
-                treading = np.delete(treading, 0, axis = 0)
-            
+            if serialString:
+                row = serialString.split(' ')
+                if serialString.split(' '):
+                    if(len(row) > 1):
+                        for i in range(len(row)):
+                            if i == 0:
+                                row[i] = str(row[i])
+                            elif i == 1:
+                                row[i] = int(row[i])
+
+                        reading = np.vstack((reading, row))
+                        
+                        reading = np.delete(reading, 0, axis = 0) #delete first array, fak numpy
+
+                        treading = np.vstack((treading, reading))
+
+                    if count == 0:
+                        treading = np.delete(treading, 0, axis = 0)
+                        
+                    rawdata[:] = [] #Empties array
+                    serialString = ''
+                    if ('1h' in treading): 
+                        count2 = 1
+                        self.identify()
+                        break
+                                
             rawdata[:] = [] #Empties array
             serialString = ''
-            time.sleep(500)
+            count += 1
+
+            
+            
         else:
             data[:] = []
             reading[:] = []
             serialString = ''
+            
 
-            if(len(reading) > 0):
-                self.identify(partial(self, treading))
-
-    def identify(self, treading): #identify components, pass values to addComponents() to display corresponding components
-
+    def identify(self): #identify components, pass values to addComponents() to display corresponding components
+        global treading
         global result
 
-        r = re.compile("([a-zA-Z]+)([0-9]+)")
+        result = np.array([[1,2,3]])
 
+        #print(treading)
+
+        r = re.compile("([a-zA-Z]+)([0-9]+)")
         for i in range(len(treading)): #for every row, pin
             for x in range(2): #for the 2 values in each array
                 if x == 0:
@@ -103,29 +135,33 @@ class mywindow(QtWidgets.QMainWindow):
                         pin = re.split('(\d+)', treading[i, 0])[2]
                         if row.index(pin) % 2 == 0: #only calculate average once for each component
                                 r1 = int(treading[i, x+1]) #get resistance of current pin
-                                if np.where(a == num + row[row.index(pin)+1])[0].size > 0: #check if a corresponding pin exists
-                                    r2 = int(treading[(np.where(treading == num + row[row.index(pin)+1]))[0], int(np.where(treading == num + row[row.index(pin)+1])[1]) + 1]) #get next pin according to row number, and then get it's resistance value
-                                    ravg = (r1 + r2) /2
-                                    final = np.array([int(num) - 1, int(row.index(pin) / 2), switcher.get(ravg)]) #add all needed values to a single array
-                                    result = np.vstack((result, final)) #add all needed values to result array
-                                if i == 0:
-                                    result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
-                                    print(result)
-
-        self.addComponents(partial(self, result))
+                                if r1 > 0:
+                                    if np.where(treading == num + row[row.index(pin)+1])[0].size > 0: #check if a corresponding pin exists\
+                                        r2 = int(treading[(np.where(treading == num + row[row.index(pin)+1]))[0], int(np.where(treading == num + row[row.index(pin)+1])[1]) + 1]) #get next pin according to row number, and then get it's resistance value
+                                        if r2 != 0:
+                                            ravg = (r1 + r2) /2
+                                            final = np.array([int(num) - 1, int(row.index(pin) / 2), switcher.get(ravg)]) #add all needed values to a single array
+                                            result = np.vstack((result, final)) #add all needed values to result array
+                                    if i == 0:
+                                        result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
+                                    print(result) 
         
-    def addComponents(self, passedresult):
+        self.addComponents()                            
+                                   
+        
+    def addComponents(self):
         global scene
+        global count2
+        global result
 
-        for i in range(len(passedresult)): #for every component
-        
-            yfactor = passedresult[i, 0]
-            xfactor = passedresult[i, 1]
-            pin = passedresult[i, 0]
-            size = self.getSvgSize(passedresult[i, 2][1])
-            svg_renderer = QtSvg.QSvgRenderer(passedresult[i, 2][1])
+        for i in range(len(result)): #for every component
+            xfactor = result[i, 0]
+            yfactor = result[i, 1]
+            pin = result[i, 0]
+            size = self.getSvgSize(result[i, 2][1])
+            svg_renderer = QtSvg.QSvgRenderer(result[i, 2][1])
 
-            pixmap = QtGui.QImage(size[0] / passedresult[i, 2][2], size[1] / passedresult[i, 2][3], QtGui.QImage.Format_ARGB32) #divide image width and height by ratio defined in switcher.py 
+            pixmap = QtGui.QImage(size[0] / result[i, 2][2], size[1] / result[i, 2][3], QtGui.QImage.Format_ARGB32) #divide image width and height by ratio defined in switcher.py 
             t = QtGui.QTransform()
             t.rotate(90)
 
@@ -138,14 +174,17 @@ class mywindow(QtWidgets.QMainWindow):
             
             scene.addItem(pixmapitem)
 
-            pixmapitem.moveBy(67+19 * xfactor + xfactor * 1.1, 92 + 37 * yfactor) 
+            pixmapitem.moveBy(67+19 * xfactor + xfactor * 1.1, 92 + 37.5 * yfactor) 
             
             view = self.ui.graphicsView
             
             view.setScene(scene)
             
-            view.show()
-
+            view.show()       
+            
+            if i == len(result) - 1:
+                time.sleep(3)
+            
     def getSvgSize(path, attributes): #get dimensions of svg to keep proper aspect ratio
         paths, attributes = svg2paths(attributes)
 
@@ -158,7 +197,27 @@ class mywindow(QtWidgets.QMainWindow):
         results = [mypath.length() * 1.5, (xmax-xmin)*1.5]
         return results
     
+
+class Worker(QThread): #read serial few times before real reading
+
+    countChanged = pyqtSignal(int)
+
+    def run(self):
+
+        timeout = time.time() + 2.5
+
+        while arduino.readable():
+            
+            arduino.readline().decode()
+            
+            if time.time() > timeout:
+                break            
+
 app = QtWidgets.QApplication([])
+
+count = 0
+
+count2 = 0
 
 scene = QGraphicsScene() 
 application = mywindow()
