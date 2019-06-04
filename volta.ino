@@ -1,6 +1,6 @@
 const int resistor = 2000;   //the fixed resistor used
 
-const char row[] = "abcdefgh";
+const char row[] = "ABCDEFGH";
 const int pin[] = {A0, A1, A2, A3, A4, A5};
 
 const int columnNum = 1;
@@ -23,6 +23,7 @@ Serial.begin(9600);
 void loop() {
   // loop through all the cd4015 I/O, or known as every kaki
   for (int i = 0; i < 8; ++i){//for each breadboard jack
+        //looping horizontally from left to right
     digitalWrite(a, HIGH && (i & B00000001)); //still loop
     digitalWrite(b, HIGH && (i & B00000010));
     digitalWrite(c, HIGH && (i & B00000100));
