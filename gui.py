@@ -18,7 +18,7 @@ import serial
 import time
 from switcher import switcher
 
-port = 'COM3'
+port = 'COM4'
 rawdata = []
 serialstring = ''
 data = [] #Array after obtaining mean of 2 resistance values
@@ -102,7 +102,7 @@ class mywindow(QtWidgets.QMainWindow):
                         
                     rawdata[:] = [] #Empties array
                     serialString = ''
-                    if ('1H' in treading): 
+                    if ('2H' in treading): 
                         #print(treading)
                         count2 = 1
                         self.identify()
@@ -126,55 +126,56 @@ class mywindow(QtWidgets.QMainWindow):
 
         result = np.array([[1,2,3,4]]) #[xfactor, yfactor, orientation, switcher result]
 
+        pair = np.array(['1', '1']) #[pin1, pin2]
+
         print(treading)
 
         r = re.compile("([a-zA-Z]+)([0-9]+)")
         for i in range(len(treading)): #for every row, pin
-            for x in range(2): #for the 2 values in each array
-                if x == 0:
+               
+                for x in range(2): #for the 2 values in each array
+                    if x == 0:
+
+                        r1 = int(treading[i, x+1]) #get resistance of current pin
+                            
                         num = re.split('(\d+)', treading[i, 0])[1]
                         pin = re.split('(\d+)', treading[i, 0])[2]
-                        if row.index(pin) %2 == 0: #only calculate average once for each component
-                            r1 = int(treading[i, x+1]) #get resistance of current pin
-                            if r1 > 0:
-                                if np.where(treading == num + row[row.index(pin)+1])[0].size > 0: #check if a corresponding pin exists
-                                    r2 = int(treading[i + 1, 1]) #get next pin according to row number, and then get it's resistance value
-                                    if r2 == 0:
-                                        for z in range(5 - int(num)):
-                                            if z > 1:
-                                                if int(num) + 8*z <= len(treading):
-                                                    r2 = int(treading[int(num) + 8*z, 1])
-                                                    if r2 > 0:
-                                                        break
-                                    if r2 > 0:
-                                        ravg = (r1 + r2) /2
-                                        final = np.array([int(num) - 1, int(row.index(pin) / 2), 0, switcher.get(ravg)]) #add all needed values to a single array
-                                        result = np.vstack((result, final)) #add all needed values to result array
-                                    print(result)
-                            elif r1 == 0 and np.where(treading == num + row[row.index(pin)+1])[0].size > 0:
-                                i += 1
-                                r1 = int(treading[i, x+1]) #get 1st pin according to row number, and then get it's resistance value
-                                if r1 > 0:
-                                    r2 = int(treading[i + 1, 1]) #get 2nd pin according to row number, and then get it's resistance value
-                                    if r2 == 0:
-                                        for z in range(5 - int(num)):
-                                            if z > 1:
-                                                if int(num) + 8*z <= len(treading):
-                                                    r2 = int(treading[int(num) + 8*z, 1])
-                                                    if r2 > 0:
-                                                        break
-                                    if r2 > 0:
-                                        ravg = (r1 + r2) /2
-                                        final = np.array([int(num) - 1, int(row.index(pin) / 2) + 0.5, 1, switcher.get(ravg)]) #add all needed values to a single array
-                                        result = np.vstack((result, final)) #add all needed values to result array
-                                if i == 1:
-                                    result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
-                                print(result)
 
-                        if i == 0:
-                            result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
+                        if r1 > 0:
+
+                            if(np.where(pair == str(treading[(np.where(treading == str(r1)))[0], 0][0]))[0].size == 0): #check if pin 1 paired to another pin before
+                                #if np.where(treading == num + row[row.index(pin)+1])[0].size > 0: #check if a corresponding pin exists
+                                    
+                                    if re.split('(\d+)', treading[i + 1, 0])[1] == num or re.split('(\d+)', treading[i + 1, 0])[2] == pin:
+                                        r2 = int(treading[i + 1, 1]) #get next pin according to row number, and then get it's resistance value
+                                    else:
+                                        r2 = 0
+                                    
+                                    if r2 == 0 and row.index(pin) < 4:
+                                        for z in range(8 - row.index(pin)): #only read till pin H for each row
+                                            if z > 3 - row.index(pin): #only start reading from E
+                                                r2 = int(treading[(np.where(treading == num + row[row.index(pin)+z]))[0], 1])
+                                                if r2 > 0:
+                                                            
+                                                    if(np.where(pair == str(treading[(np.where(treading == str(r2)))[0], 0][0]))[0].size == 0): #check if pin 2 paired to another pin before
+                                                        orientation = 0
+                                                        break  
+                                    else:
+                                        orientation = 1
+                                    if r2 > 0:
+                                        ravg = (r1 + r2) /2
+                                        currentpin = str(treading[(np.where(treading == str(r2)))[0], 0][0])
+                                        temppair = np.array([str(treading[i, 0]), currentpin])
+                                        pair = np.vstack((pair, temppair))
+                                        final = np.array([int(num) - 1, int(row.index(pin) / 2), orientation, switcher.get(ravg)]) #add all needed values to a single array
+                                        result = np.vstack((result, final)) #add all needed values to result array 
+                                
+                if i == 0:
+                    
+                    result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
                         
-        
+        print(result)
+        print(pair)
         self.addComponents()                            
                                    
         

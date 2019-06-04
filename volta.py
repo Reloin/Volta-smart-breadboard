@@ -5,7 +5,7 @@ import numpy as np
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
-port = 'COM3'
+port = 'COM5'
 rawdata = []
 serialstring = ''
 reading = [] #Array of resistance values converted to integers

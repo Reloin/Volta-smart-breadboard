@@ -1,11 +1,13 @@
 const char row[] = "ABCDEFGH";
 const int pin[] = {A0, A1, A2, A3, A4, A5};
 
-const int columnNum = 1;
+const int columnNum = 2;
 
 const int a = 2; //3 pin to rule them all
 const int b = 3;
 const int c = 4;
+
+const int threshold = 880;
 
 void setup() {
   
@@ -34,7 +36,7 @@ void loop() {
       int data = analogRead(pin[x]);
       show(x, i);//display which pin is currently reading
       Serial.print(" "); //easier to read
-      if(data > 1020){
+      if(data > threshold){
         data = 0;
        }
       Serial.print(data);
