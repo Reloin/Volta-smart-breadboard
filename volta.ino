@@ -1,5 +1,4 @@
 const int resistor = 2000;   //the fixed resistor used
-const int offset = 0; //Eliminate inaccuracy
 
 const char row[] = "abcdefgh";
 const int pin[] = {A0, A1, A2, A3, A4, A5};
