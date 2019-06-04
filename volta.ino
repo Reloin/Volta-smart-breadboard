@@ -1,5 +1,3 @@
-const int resistor = 2000;   //the fixed resistor used
-
 const char row[] = "ABCDEFGH";
 const int pin[] = {A0, A1, A2, A3, A4, A5};
 
