@@ -168,13 +168,19 @@ class mywindow(QtWidgets.QMainWindow):
                                             temppair = np.array([str(treading[i, 0]), currentpin])
                                             p1 = re.split('(\d+)', treading[i, 0]) #find orientation
                                             p2 = re.split('(\d+)', currentpin)
-                                            if p1[0] == p1[0]:
-                                                orientation = 0
-                                            elif p1[1] == p1[1]:
-                                                orientation = 1
+                                            if p1[1] == p2[1]:
+                                                orientation = 0 #horizontal
+                                            elif p1[2] == p2[2]:
+                                                orientation = 1 #vertical
+                                            else:
+                                                orientation = 2 #diagonal
+
+                                            if int(p2[1]) - int(p1[1]) > 0 or row.index(p2[2]) - row.index(p1[2]) > 3:
+                                                final = np.array([int(num) - 1, int(row.index(pin) / 2), orientation, switcher.get(ravg)]) #add all needed values to a single array
+                                                result = np.vstack((result, final)) #add all needed values to result array
+                                            else: 
+                                                print("Error")
                                             pair = np.vstack((pair, temppair))
-                                            final = np.array([int(num) - 1, int(row.index(pin) / 2), orientation, switcher.get(ravg)]) #add all needed values to a single array
-                                            result = np.vstack((result, final)) #add all needed values to result array
                                             break
                                                      
                                 
