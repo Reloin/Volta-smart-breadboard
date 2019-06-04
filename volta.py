@@ -5,7 +5,7 @@ import numpy as np
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
-port = '/dev/cu.usbmodem14101'
+port = 'COM3'
 rawdata = []
 serialstring = ''
 reading = [] #Array of resistance values converted to integers
@@ -30,7 +30,9 @@ while arduino.readable():
                
         reading = np.vstack((reading, row))
              
-        reading = np.delete(reading, 0, axis = 0) #delete first array, fak numpy
+        reading = np.delete(reading, 0, axis = 0) #delete first array, fak numpy\
+
+        print(reading)
                 
         treading = np.vstack((treading, reading))
         if count == 0:

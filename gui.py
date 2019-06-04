@@ -18,12 +18,12 @@ import serial
 import time
 from switcher import switcher
 
-port = '/dev/cu.usbmodem14101'
+port = 'COM3'
 rawdata = []
 serialstring = ''
 data = [] #Array after obtaining mean of 2 resistance values
 
-row = 'abcdefgh'
+row = 'ABCDEFGH'
 treading = np.array([1,2])
 
 result = np.array([[1,2,3]]) #final result to be passed to addComponents function
@@ -102,7 +102,8 @@ class mywindow(QtWidgets.QMainWindow):
                         
                     rawdata[:] = [] #Empties array
                     serialString = ''
-                    if ('1h' in treading): 
+                    if ('1H' in treading): 
+                        #print(treading)
                         count2 = 1
                         self.identify()
                         break
@@ -123,9 +124,9 @@ class mywindow(QtWidgets.QMainWindow):
         global treading
         global result
 
-        result = np.array([[1,2,3]])
+        result = np.array([[1,2,3,4]]) #[xfactor, yfactor, orientation, switcher result]
 
-        #print(treading)
+        print(treading)
 
         r = re.compile("([a-zA-Z]+)([0-9]+)")
         for i in range(len(treading)): #for every row, pin
@@ -133,18 +134,46 @@ class mywindow(QtWidgets.QMainWindow):
                 if x == 0:
                         num = re.split('(\d+)', treading[i, 0])[1]
                         pin = re.split('(\d+)', treading[i, 0])[2]
-                        if row.index(pin) % 2 == 0: #only calculate average once for each component
-                                r1 = int(treading[i, x+1]) #get resistance of current pin
+                        if row.index(pin) %2 == 0: #only calculate average once for each component
+                            r1 = int(treading[i, x+1]) #get resistance of current pin
+                            if r1 > 0:
+                                if np.where(treading == num + row[row.index(pin)+1])[0].size > 0: #check if a corresponding pin exists
+                                    r2 = int(treading[i + 1, 1]) #get next pin according to row number, and then get it's resistance value
+                                    if r2 == 0:
+                                        for z in range(5 - int(num)):
+                                            if z > 1:
+                                                if int(num) + 8*z <= len(treading):
+                                                    r2 = int(treading[int(num) + 8*z, 1])
+                                                    if r2 > 0:
+                                                        break
+                                    if r2 > 0:
+                                        ravg = (r1 + r2) /2
+                                        final = np.array([int(num) - 1, int(row.index(pin) / 2), 0, switcher.get(ravg)]) #add all needed values to a single array
+                                        result = np.vstack((result, final)) #add all needed values to result array
+                                    print(result)
+                            elif r1 == 0 and np.where(treading == num + row[row.index(pin)+1])[0].size > 0:
+                                i += 1
+                                r1 = int(treading[i, x+1]) #get 1st pin according to row number, and then get it's resistance value
                                 if r1 > 0:
-                                    if np.where(treading == num + row[row.index(pin)+1])[0].size > 0: #check if a corresponding pin exists\
-                                        r2 = int(treading[(np.where(treading == num + row[row.index(pin)+1]))[0], int(np.where(treading == num + row[row.index(pin)+1])[1]) + 1]) #get next pin according to row number, and then get it's resistance value
-                                        if r2 != 0:
-                                            ravg = (r1 + r2) /2
-                                            final = np.array([int(num) - 1, int(row.index(pin) / 2), switcher.get(ravg)]) #add all needed values to a single array
-                                            result = np.vstack((result, final)) #add all needed values to result array
-                                    if i == 0:
-                                        result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
-                                    print(result) 
+                                    r2 = int(treading[i + 1, 1]) #get 2nd pin according to row number, and then get it's resistance value
+                                    if r2 == 0:
+                                        for z in range(5 - int(num)):
+                                            if z > 1:
+                                                if int(num) + 8*z <= len(treading):
+                                                    r2 = int(treading[int(num) + 8*z, 1])
+                                                    if r2 > 0:
+                                                        break
+                                    if r2 > 0:
+                                        ravg = (r1 + r2) /2
+                                        final = np.array([int(num) - 1, int(row.index(pin) / 2) + 0.5, 1, switcher.get(ravg)]) #add all needed values to a single array
+                                        result = np.vstack((result, final)) #add all needed values to result array
+                                if i == 1:
+                                    result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
+                                print(result)
+
+                        if i == 0:
+                            result = np.delete(result, 0, axis = 0) #delete first array in result, can't create a np.array without it
+                        
         
         self.addComponents()                            
                                    
@@ -158,12 +187,13 @@ class mywindow(QtWidgets.QMainWindow):
             xfactor = result[i, 0]
             yfactor = result[i, 1]
             pin = result[i, 0]
-            size = self.getSvgSize(result[i, 2][1])
-            svg_renderer = QtSvg.QSvgRenderer(result[i, 2][1])
+            size = self.getSvgSize(result[i, 3][1])
+            svg_renderer = QtSvg.QSvgRenderer(result[i, 3][1])
 
-            pixmap = QtGui.QImage(size[0] / result[i, 2][2], size[1] / result[i, 2][3], QtGui.QImage.Format_ARGB32) #divide image width and height by ratio defined in switcher.py 
+            pixmap = QtGui.QImage(size[0] / result[i, 3][2], size[1] / result[i, 3][3], QtGui.QImage.Format_ARGB32) #divide image width and height by ratio defined in switcher.py 
             t = QtGui.QTransform()
-            t.rotate(90)
+            if result[i, 2] == 0:
+                t.rotate(90)
 
             pixmap.fill(0x00000000)
             svg_renderer.render(QtGui.QPainter(pixmap))
