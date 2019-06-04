@@ -17,6 +17,7 @@ from range_key_dict import RangeKeyDict
 import serial
 import time
 from switcher import switcher
+from rrange import rrange
 
 port = 'COM4'
 rawdata = []
@@ -128,7 +129,7 @@ class mywindow(QtWidgets.QMainWindow):
 
         pair = np.array(['1', '1']) #[pin1, pin2]
 
-        print(treading)
+        #print(treading)
 
         r = re.compile("([a-zA-Z]+)([0-9]+)")
         for i in range(len(treading)): #for every row, pin
@@ -145,30 +146,37 @@ class mywindow(QtWidgets.QMainWindow):
 
                             if(np.where(pair == str(treading[(np.where(treading == str(r1)))[0], 0][0]))[0].size == 0): #check if pin 1 paired to another pin before
                                 #if np.where(treading == num + row[row.index(pin)+1])[0].size > 0: #check if a corresponding pin exists
-                                    
-                                    if re.split('(\d+)', treading[i + 1, 0])[1] == num or re.split('(\d+)', treading[i + 1, 0])[2] == pin:
-                                        r2 = int(treading[i + 1, 1]) #get next pin according to row number, and then get it's resistance value
-                                    else:
-                                        r2 = 0
-                                    
-                                    if r2 == 0 and row.index(pin) < 4:
-                                        for z in range(8 - row.index(pin)): #only read till pin H for each row
-                                            if z > 3 - row.index(pin): #only start reading from E
-                                                r2 = int(treading[(np.where(treading == num + row[row.index(pin)+z]))[0], 1])
-                                                if r2 > 0:
-                                                            
+
+                                    r2range = rrange.get(r1)[0]
+                                    #print(r2range)
+
+                                    r2 = 0
+                                    r3 = 0
+
+                                    for z in range(2):
+                                        for y in range(8):
+                                            if row.index(pin) + y < 8: #only start reading from E
+                                                r2 = int(treading[(np.where(treading == str(int(num) + z) + row[row.index(pin)+ y]))[0], 1])
+                                                if r2 in r2range:   
                                                     if(np.where(pair == str(treading[(np.where(treading == str(r2)))[0], 0][0]))[0].size == 0): #check if pin 2 paired to another pin before
-                                                        orientation = 0
+                                                        r3 = r2
+                                                        #print(r2)
                                                         break  
-                                    else:
-                                        orientation = 1
-                                    if r2 > 0:
-                                        ravg = (r1 + r2) /2
-                                        currentpin = str(treading[(np.where(treading == str(r2)))[0], 0][0])
-                                        temppair = np.array([str(treading[i, 0]), currentpin])
-                                        pair = np.vstack((pair, temppair))
-                                        final = np.array([int(num) - 1, int(row.index(pin) / 2), orientation, switcher.get(ravg)]) #add all needed values to a single array
-                                        result = np.vstack((result, final)) #add all needed values to result array 
+                                        if r3 > 0:
+                                            ravg = (r1 + r3) /2
+                                            currentpin = str(treading[(np.where(treading == str(r3)))[0], 0][0])
+                                            temppair = np.array([str(treading[i, 0]), currentpin])
+                                            p1 = re.split('(\d+)', treading[i, 0]) #find orientation
+                                            p2 = re.split('(\d+)', currentpin)
+                                            if p1[0] == p1[0]:
+                                                orientation = 0
+                                            elif p1[1] == p1[1]:
+                                                orientation = 1
+                                            pair = np.vstack((pair, temppair))
+                                            final = np.array([int(num) - 1, int(row.index(pin) / 2), orientation, switcher.get(ravg)]) #add all needed values to a single array
+                                            result = np.vstack((result, final)) #add all needed values to result array
+                                            break
+                                                     
                                 
                 if i == 0:
                     
