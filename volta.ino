@@ -12,10 +12,10 @@ const int c = 4;
 void setup() {
   
   for(int i = 0; i < columnNum; ++i){
-    analogRead(pin[i], INPUT);
+    pinMode(pin[i], INPUT);
 
   }
-pinMode(A0, INPUT);
+
 pinMode(a, OUTPUT);
 pinMode(b, OUTPUT);
 pinMode(c, OUTPUT);
@@ -44,7 +44,7 @@ void loop() {
     }
     
   }
-  delay(5000);
+  delay(2000);
 
 }
 
