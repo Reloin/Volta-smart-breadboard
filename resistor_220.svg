@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg version="1.2"  baseProfile="tiny" xmlns:svg="http://www.w3.org/2000/svg"
 	 xmlns="http://www.w3.org/2000/svg"
-	 x="0" y="0" width="0.42917in" height="0.0971in" viewBox="0 0 42.917 9.71" 
+	 x="0" y="0" width="0.24917in" height="0.0971in" viewBox="9 0 24.917 9.71" 
 	 >
 <g id="breadboard">
 
@@ -9,8 +9,8 @@
 	<rect id="connector0pin" x="0.5" y="3.59" fill="none" width="1" height="1"/>
 	<rect id="connector1pin" x="41.417" y="3.59" fill="none" width="1" height="1"/>
   
-	<line  id="connector0leg" stroke-linecap="round" x1="1.455" y1="5.045" x2="2.91" y2="5.045" stroke="#8C8C8C" fill="none" stroke-width="2.91" />
-	<line  id="connector1leg" stroke-linecap="round" x1="41.462" y1="5.045" x2="40.007" y2="5.045" stroke="#8C8C8C" fill="none" stroke-width="2.91" />
+	<line  id="connector0leg" stroke-linecap="round" x1="10.455" y1="5.045" x2="2.91" y2="5.045" stroke="#8C8C8C" fill="none" stroke-width="2.91" />
+	<line  id="connector1leg" stroke-linecap="round" x1="41.462" y1="5.045" x2="31.007" y2="5.045" stroke="#8C8C8C" fill="none" stroke-width="2.91" />
 
 	<path fill="none" stroke="#8C8C8C" stroke-width="2.91" d="M1.455,5.045l39.398,0" />
 	

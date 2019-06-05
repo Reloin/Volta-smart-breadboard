@@ -105,7 +105,7 @@ class mywindow(QtWidgets.QMainWindow):
                     rawdata[:] = [] #Empties array
                     serialString = ''
                     if ('2H' in treading): 
-                        #print(treading)
+                        print(treading)
                         count2 = 1
                         self.identify()
                         break
@@ -176,7 +176,7 @@ class mywindow(QtWidgets.QMainWindow):
                                             else:
                                                 orientation = 2 #diagonal
 
-                                            if int(p2[1]) - int(p1[1]) > 0 or row.index(p2[2]) - row.index(p1[2]) > 1:
+                                            if int(p2[1]) - int(p1[1]) > 0 or (row.index(p2[2]) > 3 and row.index(p1[2]) < 4) or (row.index(p2[2]) > 4 and row.index(p1[2]) < 3):
                                                 xlength = int(p2[1]) - int(p1[1])
                                                 ylength = row.index(p2[2]) - row.index(p1[2])
                                                 yfactor = float(row.index(pin) / 2)
@@ -185,7 +185,7 @@ class mywindow(QtWidgets.QMainWindow):
                                                 final = np.array([int(num) - 1, yfactor, xlength, ylength, orientation, switcher.get(ravg)]) #add all needed values to a single array
                                                 result = np.vstack((result, final)) #add all needed values to result array
                                             else: 
-                                                print("Error")
+                                                print("Error") #component wrongly inserted
                                             pair = np.vstack((pair, temppair))
                                             break
                                                      
@@ -213,10 +213,13 @@ class mywindow(QtWidgets.QMainWindow):
                 size = self.getSvgSize(result[i, 5][1])
                 svg_renderer = QtSvg.QSvgRenderer(result[i, 5][1])
 
-                pixmap = QtGui.QImage(size[0] * 91, size[1] * 90, QtGui.QImage.Format_ARGB32) #divide image width and height by ratio defined in switcher.py 
+                pixmap = QtGui.QImage(size[0] * 70, size[1] * 92, QtGui.QImage.Format_ARGB32) #divide image width and height by ratio defined in switcher.py 
                 t = QtGui.QTransform()
                 if result[i, 4] == 0:
                     t.rotate(90)
+                    yadd = 1.5
+                else:
+                    yadd = 0
 
                 pixmap.fill(0x00000000)
                 svg_renderer.render(QtGui.QPainter(pixmap))
@@ -227,46 +230,75 @@ class mywindow(QtWidgets.QMainWindow):
                 
                 scene.addItem(pixmapitem)
 
-                pixmapitem.moveBy(60 + 17.7 * xfactor + xfactor * 1.1, 79 + 35 * yfactor) 
+                pixmapitem.moveBy(61 + 16 * xfactor, 78 + 33 * yfactor + yadd) 
             
             else:
                 filename = result[i, 5][1]
                 tree = etree.parse(open(filename, 'r'))
 
-                for element in tree.iter():
-                    if element.tag.split("}")[1] == "svg":
-                        element.set("width", str(0.42917 + 0.18 * result[i, 3]) + "in")
-                        for g in range(4):
-                            if g == 1:
-                                x = re.split('(\d+)', element.get("width"))[g]
-                            elif g > 1:
-                                x = x + re.split('(\d+)', element.get("width"))[g]
+                if result[i, 3] > 0 and result[i, 2] == 0:
+                    for element in tree.iter():
+                        if element.tag.split("}")[1] == "svg":
+                            element.set("width", str(0.42917 + 0.2 * result[i, 3]) + "in") #make svg wider according to pin distance
+                            for g in range(4):
+                                if g == 1:
+                                    x = re.split('(\d+)', element.get("width"))[g]
+                                elif g > 1:
+                                    x = x + re.split('(\d+)', element.get("width"))[g]
 
-                        for z in range(4):
-                            if z == 1:
-                                y = re.split('(\d+)', element.get("height"))[z]
-                            elif z > 1:
-                                y = y + re.split('(\d+)', element.get("height"))[z]
+                            for z in range(4):
+                                if z == 1:
+                                    y = re.split('(\d+)', element.get("height"))[z]
+                                elif z > 1:
+                                    y = y + re.split('(\d+)', element.get("height"))[z]
 
-                        element.set("viewBox", str(0 - 9 * result[i, 3]) + " 0 " + str(42.917 + 18 * result[i, 3]) + " " +  str(7*3))
-                        
-                    if element.tag.split("}")[1] == "line":
-                        if element.get("id") == "connector0leg":
-                            element.set("x1", str(1.455 - 9 * result[i, 3]))
-                        if element.get("id") == "connector1leg":
-                            element.set("x2", str(40.007 + 9 * result[i, 3]))
+                            element.set("viewBox", str(0 - 10 * result[i, 3]) + " 0 " + str(42.917 + 20 * result[i, 3]) + " 9.71")
+                            
+                        if element.tag.split("}")[1] == "line": #make individual connectors longer
+                            if element.get("id") == "connector0leg":
+                                element.set("x1", str(1.455 - 10 * result[i, 3]))
+                            if element.get("id") == "connector1leg":
+                                element.set("x2", str(40.007 + 10 * result[i, 3]))
+
+                    size = [float(x) * 85, float(y) * 50]
+
+                elif result[i, 3] > 0 and result[i, 2] > 0:
+                    for element in tree.iter():
+                        if element.tag.split("}")[1] == "svg":
+                            element.set("width", str(0.24917 + 0.08 * result[i, 3]) + "in") #make svg wider according to pin distance
+                            for g in range(4):
+                                if g == 1:
+                                    x = re.split('(\d+)', element.get("width"))[g]
+                                elif g > 1:
+                                    x = x + re.split('(\d+)', element.get("width"))[g]
+
+                            for z in range(4):
+                                if z == 1:
+                                    y = re.split('(\d+)', element.get("height"))[z]
+                                elif z > 1:
+                                    y = y + re.split('(\d+)', element.get("height"))[z]
+
+                            element.set("viewBox", str(0 - 4 * result[i, 3]) + " 0 " + str(42.917 + 8 * result[i, 3]) + " 9.71")
+                            
+                        if element.tag.split("}")[1] == "line": #make individual connectors longer
+                            if element.get("id") == "connector0leg":
+                                element.set("x1", str(1.455 - 4 * result[i, 3]))
+                            if element.get("id") == "connector1leg":
+                                element.set("x2", str(40.007 + 4 * result[i, 3]))
+
+                    size = [float(x) * 105, float(y) * 50]
 
                 new_svg = etree.tostring(tree)
 
-                svg_renderer = QtSvg.QSvgRenderer(new_svg)
-
-                size = [float(x) * 91, float(y) * 90]
-                print(size)
+                svg_renderer = QtSvg.QSvgRenderer(new_svg)                
 
                 pixmap = QtGui.QImage(size[0], size[1] * 2, QtGui.QImage.Format_ARGB32) #divide image width and height by ratio defined in switcher.py 
                 t = QtGui.QTransform()
                 if result[i, 4] == 0:
                     t.rotate(90)
+                    yadd = 1.5
+                else:
+                    yadd = 0
 
                 pixmap.fill(0x00000000)
                 svg_renderer.render(QtGui.QPainter(pixmap))
@@ -277,7 +309,7 @@ class mywindow(QtWidgets.QMainWindow):
                 
                 scene.addItem(pixmapitem)
 
-                pixmapitem.moveBy(50 + 17 * xfactor + xfactor * 1.1, 79.5 + 35 * yfactor) 
+                pixmapitem.moveBy(59 + 17 * xfactor + xfactor * 1.1, 78 + 35 * yfactor + yadd) 
                 
             view = self.ui.graphicsView
                 
