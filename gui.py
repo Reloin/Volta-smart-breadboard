@@ -30,7 +30,7 @@ treading = np.array([1,2])
 
 result = np.array([[1,2,3]]) #final result to be passed to addComponents function
 
-#arduino = serial.Serial(port, 9600, timeout=0)
+arduino = serial.Serial(port, 9600, timeout=0)
 
 class mywindow(QtWidgets.QMainWindow):
  
@@ -210,13 +210,13 @@ class mywindow(QtWidgets.QMainWindow):
 
         rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
         rect_item.setBrush(QtCore.Qt.white)
-        rect_item.moveBy(16, 45)
+        rect_item.moveBy(20, 55)
         scene.addItem(rect_item) 
 
         mytext1 = QGraphicsSimpleTextItem('+5V')
         mytext1.setFont(font)
         scene.addItem(mytext1)
-        mytext1.moveBy(20, 48)
+        mytext1.moveBy(24, 58)
 
         rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
         rect_item.setBrush(QtCore.Qt.white)
@@ -237,9 +237,13 @@ class mywindow(QtWidgets.QMainWindow):
         svg_renderer.render(QtGui.QPainter(pixmap))
         pixmap = QtGui.QPixmap.fromImage(pixmap)
         
+        t = QtGui.QTransform() 
+        t.rotate(180) 
+        pixmap = pixmap.transformed(t)
+        
         pixmapitem = QGraphicsPixmapItem(pixmap)
         
-        pixmapitem.moveBy(58, 25)
+        pixmapitem.moveBy(57.5, 78 + 33 * 5.1)
 
         scene.addItem(pixmapitem)
 
