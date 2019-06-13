@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore, QtSvg, QtGui
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGraphicsScene, QGraphicsPixmapItem
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGraphicsScene, QGraphicsPixmapItem, QGraphicsSimpleTextItem
 from PyQt5.QtGui import QIcon, QPixmap
 from svgpathtools import svg2paths
 from functools import partial
@@ -30,7 +30,7 @@ treading = np.array([1,2])
 
 result = np.array([[1,2,3]]) #final result to be passed to addComponents function
 
-arduino = serial.Serial(port, 9600, timeout=0)
+#arduino = serial.Serial(port, 9600, timeout=0)
 
 class mywindow(QtWidgets.QMainWindow):
  
@@ -57,6 +57,30 @@ class mywindow(QtWidgets.QMainWindow):
         pixmap = QtGui.QPixmap.fromImage(pixmap)
         
         scene.addItem(QGraphicsPixmapItem(pixmap))
+
+        font = QtGui.QFont()
+        font.setPointSize(12)
+
+        rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
+        rect_item.setBrush(QtCore.Qt.white)
+        rect_item.moveBy(16, 45)
+        scene.addItem(rect_item) 
+
+        mytext1 = QGraphicsSimpleTextItem('+5V')
+        mytext1.setFont(font)
+        scene.addItem(mytext1)
+        mytext1.moveBy(20, 48)
+
+        rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
+        rect_item.setBrush(QtCore.Qt.white)
+        rect_item.moveBy(90, 227)
+        scene.addItem(rect_item) 
+
+        mytext2 = QGraphicsSimpleTextItem('GND')
+        mytext2.setFont(font)
+        scene.addItem(mytext2)
+        mytext2.moveBy(95, 230) 
+
         view = self.ui.graphicsView
 
         view.setScene(scene)
@@ -203,6 +227,25 @@ class mywindow(QtWidgets.QMainWindow):
         global scene
         global count2
         global result
+
+        size = self.getSvgSize('LED-5mm-red-leg.svg')
+        svg_renderer = QtSvg.QSvgRenderer('LED-5mm-red-leg.svg')
+
+        pixmap = QtGui.QImage(size[0] * 150, size[1] * 150, QtGui.QImage.Format_ARGB32)
+        
+        pixmap.fill(0x00000000)
+        svg_renderer.render(QtGui.QPainter(pixmap))
+        pixmap = QtGui.QPixmap.fromImage(pixmap)
+
+        t = QtGui.QTransform()
+        t.rotate(180)
+        pixmap = pixmap.transformed(t)
+        
+        pixmapitem = QGraphicsPixmapItem(pixmap)
+
+        pixmapitem.moveBy(58, 78 + 33 * 4.65)
+                
+        scene.addItem(pixmapitem)
 
         for i in range(len(result)): #for every component
             xfactor = result[i, 0]
