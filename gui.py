@@ -46,7 +46,7 @@ class mywindow(QtWidgets.QMainWindow):
 
         self.progress = QProgressBar(self)
         self.progress.setGeometry(50, 540, 700, 35)
-        self.progress.setMaximum(100)
+        self.progress.setMaximum(100)   
 
         size = self.getSvgSize('halfBreadboard.svg')
         svg_renderer = QtSvg.QSvgRenderer('halfBreadboard.svg')
@@ -56,30 +56,7 @@ class mywindow(QtWidgets.QMainWindow):
         svg_renderer.render(QtGui.QPainter(pixmap))
         pixmap = QtGui.QPixmap.fromImage(pixmap)
         
-        scene.addItem(QGraphicsPixmapItem(pixmap))
-
-        font = QtGui.QFont()
-        font.setPointSize(12)
-
-        rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
-        rect_item.setBrush(QtCore.Qt.white)
-        rect_item.moveBy(16, 45)
-        scene.addItem(rect_item) 
-
-        mytext1 = QGraphicsSimpleTextItem('+5V')
-        mytext1.setFont(font)
-        scene.addItem(mytext1)
-        mytext1.moveBy(20, 48)
-
-        rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
-        rect_item.setBrush(QtCore.Qt.white)
-        rect_item.moveBy(90, 227)
-        scene.addItem(rect_item) 
-
-        mytext2 = QGraphicsSimpleTextItem('GND')
-        mytext2.setFont(font)
-        scene.addItem(mytext2)
-        mytext2.moveBy(95, 230) 
+        scene.addItem(QGraphicsPixmapItem(pixmap)) 
 
         view = self.ui.graphicsView
 
@@ -228,6 +205,29 @@ class mywindow(QtWidgets.QMainWindow):
         global count2
         global result
 
+        font = QtGui.QFont()
+        font.setPointSize(12)
+
+        rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
+        rect_item.setBrush(QtCore.Qt.white)
+        rect_item.moveBy(16, 45)
+        scene.addItem(rect_item) 
+
+        mytext1 = QGraphicsSimpleTextItem('+5V')
+        mytext1.setFont(font)
+        scene.addItem(mytext1)
+        mytext1.moveBy(20, 48)
+
+        rect_item = QtWidgets.QGraphicsRectItem(QtCore.QRectF(0, 0, 50, 30))
+        rect_item.setBrush(QtCore.Qt.white)
+        rect_item.moveBy(90, 227)
+        scene.addItem(rect_item) 
+
+        mytext2 = QGraphicsSimpleTextItem('GND')
+        mytext2.setFont(font)
+        scene.addItem(mytext2)
+        mytext2.moveBy(95, 230)
+        
         size = self.getSvgSize('LED-5mm-red-leg.svg')
         svg_renderer = QtSvg.QSvgRenderer('LED-5mm-red-leg.svg')
 
@@ -236,15 +236,11 @@ class mywindow(QtWidgets.QMainWindow):
         pixmap.fill(0x00000000)
         svg_renderer.render(QtGui.QPainter(pixmap))
         pixmap = QtGui.QPixmap.fromImage(pixmap)
-
-        t = QtGui.QTransform()
-        t.rotate(180)
-        pixmap = pixmap.transformed(t)
         
         pixmapitem = QGraphicsPixmapItem(pixmap)
+        
+        pixmapitem.moveBy(58, 25)
 
-        pixmapitem.moveBy(58, 78 + 33 * 4.65)
-                
         scene.addItem(pixmapitem)
 
         for i in range(len(result)): #for every component
