@@ -20,12 +20,12 @@ from switcher import switcher
 from rrange import rrange
 from lxml import etree
 
-port = 'COM4'
+port = 'COM3'
 rawdata = []
 serialstring = ''
 data = [] #Array after obtaining mean of 2 resistance values
 
-row = 'ABCDEFGH'
+row = 'BCDEFGHI'
 treading = np.array([1,2])
 
 result = np.array([[1,2,3]]) #final result to be passed to addComponents function

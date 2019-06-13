@@ -1,4 +1,4 @@
-const char row[] = "ABCDEFGH";
+const char row[] = "BCDEFGHI";
 const int pin[] = {A0, A1, A2, A3, A4, A5};
 
 const int columnNum = 2;
