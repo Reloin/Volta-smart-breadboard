@@ -1,7 +1,7 @@
 """
 Code created by Reloin, for breadboard project
 """
-from tkinter import *
+from tkinter import Tk, Canvas
 from PIL import ImageTk, Image
 
 
