@@ -62,5 +62,3 @@ class readArduino():
         rawData = rawData.strip()
         return rawData
 
-r = readArduino()
-print(r.read_data())
