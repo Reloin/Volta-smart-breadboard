@@ -1,4 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "volta.ino"
+    "sketch": "volta.ino",
+    "port": "COM3",
+    "programmer": "AVR ISP"
 }

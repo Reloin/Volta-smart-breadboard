@@ -55,7 +55,7 @@ class app(object):
         self.showResistor(100, 300)
         self.wire(136, 193, 160, 223)
     
-    #Clearing Diagram
+    # Clearing Diagram
     def clear(self, Event):
         self.canvas.delete("all")
         self.showBb()
