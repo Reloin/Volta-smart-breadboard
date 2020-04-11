@@ -74,7 +74,7 @@ class app(object):
         self.resistor = ImageTk.PhotoImage(Image.open("svg/resistor.png"))
         r_off = 25
         l_off = 29
-        off_y = -4
+        off_y = -3
         loc = idpy.component_pos(a, b)
         self.canvas.create_image(loc, image=self.resistor)
         self.wire(a[0], a[1], loc[0] + r_off, loc[1] + off_y)
@@ -84,10 +84,10 @@ class app(object):
     def wire(self, ax, ay, bx, by):
         ax, ay = idpy.cor2pos(ax, ay)
         if ax == bx or ay == by:
-            self.canvas.create_line(ax,ay,bx,by, fill="black", width=5)
+            self.canvas.create_line(ax,ay,bx,by, fill="green", width=5)
         else:
-            self.canvas.create_line(ax,ay,ax,by, fill="black", width=5)
-            self.canvas.create_line(ax,by,bx,by, fill="black", width=5)
+            self.canvas.create_line(ax,ay,ax,by, fill="green", width=5)
+            self.canvas.create_line(ax,by,bx,by, fill="green", width=5)
 
     # draw anode and cathode dot on board
     def power(self,code, x, y):
