@@ -25,17 +25,13 @@ class readArduino():
     # read and label data
     def read_data(self):
         #initiate data for storage
-        data = np.zeros((row, column), dtype=object)
+        data = []
         # hash table for component identification
         table = {
-            'r':{
-                'pair': False,
-                'count': 1
-            },
-            'l':{
-                'pair': False,
-                'count': 1
-            }
+            'ra':{'count': 1},
+            'rc':{'count': 1},
+            'la':{'count': 1},
+            'lc':{'count': 1}
         }
 
         # where to start read data, s for start
@@ -48,14 +44,12 @@ class readArduino():
         while(d != "T"):
             x, y, val = d.split(';')
             component = idpy.identify(int(val)) # return what typr of component it is
-            data[int(x)][int(y)] = component + str(table[component]['count']) + ('b' if table[component]['pair'] else 'a')
-
-            if table[component]['pair'] : 
-                table[component]['pair'] = False
-                table[component]['count'] += 1
-            else:
-                table[component]['pair'] = True
+            if component in ("+", "-"): data.append(x+ ','+ y + ','+ component)
+            else: data.append(x+ ','+ y + ','+ component + str(table[component]['count']))
+            table[component]['count'] += 1
             d = self.element()
+
+
         return data
 
 
@@ -65,4 +59,3 @@ class readArduino():
         rawData = rawData.decode()
         rawData = rawData.strip()
         return rawData
-
