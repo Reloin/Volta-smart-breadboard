@@ -63,6 +63,7 @@ class app(object):
     def identify(self, code, a, b):
         temp = code[0]
         if temp == 'r': self.draw_resistor(a,b)
+        elif temp == 'w': self.wire(a, b)
 
     #function for showing breadboard
     def showBb(self):
@@ -77,12 +78,21 @@ class app(object):
         off_y = -3
         loc = idpy.component_pos(a, b)
         self.canvas.create_image(loc, image=self.resistor)
-        self.wire(a[0], a[1], loc[0] + r_off, loc[1] + off_y)
-        self.wire(b[0], b[1], loc[0] - l_off, loc[1] + off_y)
+        self.pin_wire(a[0], a[1], loc[0] + r_off, loc[1] + off_y)
+        self.pin_wire(b[0], b[1], loc[0] - l_off, loc[1] + off_y)
 
     # Function for drawing wire
-    def wire(self, ax, ay, bx, by):
+    def pin_wire(self, ax, ay, bx, by):
         ax, ay = idpy.cor2pos(ax, ay)
+        if ax == bx or ay == by:
+            self.canvas.create_line(ax,ay,bx,by, fill="green", width=5)
+        else:
+            self.canvas.create_line(ax,ay,ax,by, fill="green", width=5)
+            self.canvas.create_line(ax,by,bx,by, fill="green", width=5)
+
+    def wire(self, a, b):
+        ax, ay = idpy.cor2pos(a[0], a[1])
+        bx, by = idpy.cor2pos(b[0], b[1])
         if ax == bx or ay == by:
             self.canvas.create_line(ax,ay,bx,by, fill="green", width=5)
         else:
