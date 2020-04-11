@@ -18,6 +18,10 @@ class readArduino():
         except:
             print("Serial unavailable")
 
+    # pass breadboard size
+    def get_size(self):
+        return row, column
+
     # read and label data
     def read_data(self):
         #initiate data for storage
