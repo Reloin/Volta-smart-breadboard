@@ -53,5 +53,4 @@ class readArduino():
         rawData = self.ser.readline()
         rawData = rawData.decode('unicode_escape')
         rawData = rawData.strip()
-        print(rawData)
         return rawData
