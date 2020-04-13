@@ -19,43 +19,23 @@ Serial.begin(9600);
 }
 
 void loop() {
+  Serial.println("S");
   // loop through all the cd4015 I/O, or known as every kaki
-  for (int i = 0; i < 8; ++i){//for each breadboard jack
-    digitalWrite(a, HIGH && (i & B00000001)); //still loop
-    digitalWrite(b, HIGH && (i & B00000010));
-    digitalWrite(c, HIGH && (i & B00000100));
-    for (int x = 1; x < 7; ++x){//for each module
+  for (int y = 0; y < 8; ++y){//for each breadboard jack
+    digitalWrite(a, HIGH && (y & B00000001)); //still loop
+    digitalWrite(b, HIGH && (y & B00000010));
+    digitalWrite(c, HIGH && (y & B00000100));
+    for (int x = 0; x < 2; ++x){//for each module
       int data = analogRead(pin[x]);
-      show(x, i);//display which pin is currently reading
-      Serial.println(" "); //easier to read
-      Serial.write(data);
-      Serial.println("/n");
+        if(data < 700){
+          Serial.print(x);
+          Serial.print(";");
+          Serial.print(y);
+          Serial.print(";");
+          Serial.println(data);
+          }
       }
-    
     }
-
+  Serial.println("T");
 
 }
-
-
-void show(int group, int pin){
-  //see if the received data is from left or right
-  //for left hand side
-  if(pin < 4){
-    if(group == 1 || group == 2){Serial.write("1");}
-    if(group == 3 || group == 4){Serial.write("3");}
-    if(group == 5 || group == 6){Serial.write("5");}
-
-    if(group % 2){pin += 4;}// to shift right hand side group to corresponding location
-    }
-    //for right hand side
-   else if(pin > 3){
-    if(group == 1 || group == 2){Serial.write("2");}
-    if(group == 3 || group == 4){Serial.write("4");}
-    if(group == 5 || group == 6){Serial.write("6");}
-
-    if(!(group % 2)){pin -= 4;}//shift left hand side to corresponding location
-    }
-    
-    Serial.write(row[pin]);
-  }

@@ -3,17 +3,15 @@ import numpy as np
 import time
 import identifier as idpy
 
-com = 'COM3'
+com = 'COM4'
 baudRate = 9600
-row = 6
+row = 2
 column = 8
-go = False
 
 class readArduino():
     def __init__(self):
         try:
             self.ser = serial.Serial(port=com, baudrate=baudRate)
-            go = True
             #time.sleep()
         except:
             print("Serial unavailable")
@@ -53,6 +51,7 @@ class readArduino():
     # method to read and decode data
     def element(self):
         rawData = self.ser.readline()
-        rawData = rawData.decode()
+        rawData = rawData.decode('unicode_escape')
         rawData = rawData.strip()
+        print(rawData)
         return rawData

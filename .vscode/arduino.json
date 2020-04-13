@@ -1,6 +1,7 @@
 {
-    "board": "arduino:avr:uno",
-    "sketch": "volta.ino",
+    "board": "arduino:avr:nano",
+    "sketch": "volta\\volta.ino",
     "port": "COM3",
-    "programmer": "AVR ISP"
+    "programmer": "AVR ISP",
+    "configuration": "cpu=atmega328"
 }
